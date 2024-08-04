@@ -4,7 +4,6 @@ import express, { Express } from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 
-import { PORT } from './secrets'
 import v1RootRouter from './routes/v1'
 
 const app: Express = express()
@@ -16,4 +15,4 @@ app.use(express.urlencoded({ extended: false }))
 
 app.use('/api/v1', v1RootRouter)
 
-app.listen(PORT, () => console.log(`Server is running at http://localhost:${PORT}`))
+export default app

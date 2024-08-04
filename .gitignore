@@ -5,4 +5,5 @@ server/node_modules
 server/dist
 server/build
 server/.env
+server/coverage
 # server/src/secrets.ts
