@@ -1,0 +1,26 @@
+{
+  "name": "ecommerce",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "prepare": "husky install",
+    "lint:server": "cd server && npm run lint",
+    "lint:fix:server": "cd server && npm run lint:fix",
+    "format:server": "cd server && npm run format",
+    "format:check:server": "cd server && npm run format:check"
+  },
+  "keywords": [],
+  "author": "Shubham Kr Vishwakarma",
+  "license": "ISC",
+  "devDependencies": {
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.8"
+  },
+  "lint-staged": {
+    "server/src/**/*.{js,ts}": [
+      "npm run lint:fix:server",
+      "npm run format:check:server"
+    ]
+  }
+}

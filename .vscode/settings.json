@@ -1,0 +1,7 @@
+{
+  "cSpell.words": ["ecommerce", "Shubham", "tseslint", "Vishwakarma"],
+  "prettier.singleQuote": true,
+  "prettier.semi": false,
+  "prettier.endOfLine": "lf",
+  "prettier.printWidth": 110
+}
