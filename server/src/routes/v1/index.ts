@@ -2,7 +2,7 @@ import express from 'express'
 
 const v1RootRouter = express.Router()
 
-v1RootRouter.get('/', (req, res, next) => {
+v1RootRouter.get('/', (req, res) => {
   res.json({ message: 'working' })
 })
 
