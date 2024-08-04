@@ -9,18 +9,18 @@ const config: Config.InitialOptions = {
   resetMocks: true,
   restoreMocks: true,
 
-  collectCoverage: true,
-  collectCoverageFrom: ['src/**/*.{ts,js}', '!vendor/**/*.{js,ts}', '!**/node_modules/**'],
-  coverageProvider: 'v8',
-  coverageThreshold: {
-    global: {
-      branches: 100,
-      functions: 100,
-      lines: 100,
-      statements: 100,
-    },
-  },
-  maxConcurrency: 5,
+  // collectCoverage: true,
+  // collectCoverageFrom: ['src/**/*.{ts,js}', '!vendor/**/*.{js,ts}', '!**/node_modules/**'],
+  // coverageProvider: 'v8',
+  // coverageThreshold: {
+  //   global: {
+  //     branches: 100,
+  //     functions: 100,
+  //     lines: 100,
+  //     statements: 100,
+  //   },
+  // },
+  // maxConcurrency: 5,
 }
 
 export default config

@@ -14,7 +14,7 @@ describe('Node app', () => {
 
     const logSpy = jest.spyOn(global.console, 'log').mockImplementation(() => {})
 
-    await import('../server.js')
+    await import('../server')
 
     expect(app.listen).toHaveBeenCalledWith(PORT, expect.any(Function))
     expect(logSpy).toHaveBeenCalledWith(`Server is running at http://localhost:${PORT}`)

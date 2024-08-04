@@ -6,4 +6,5 @@ server/dist
 server/build
 server/.env
 server/coverage
+server/logs
 # server/src/secrets.ts

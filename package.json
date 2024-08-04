@@ -19,8 +19,8 @@
   },
   "lint-staged": {
     "server/src/**/*.{js,ts}": [
-      "npm run lint:fix:server",
-      "npm run format:check:server"
+      "npm run format:server",
+      "npm run lint:fix:server"
     ]
   }
 }

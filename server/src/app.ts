@@ -5,10 +5,13 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 
 import v1RootRouter from './routes/v1'
+import corsOptions from './config/cors/corsOptions'
+import { logger } from './middleware/logger.middleware'
 
 const app: Express = express()
 
-app.use(cors())
+app.use(logger)
+app.use(cors(corsOptions))
 app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
