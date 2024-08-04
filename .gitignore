@@ -1,0 +1,6 @@
+# server
+server/node_modules
+server/dist
+server/build
+server/.env
+# server/src/secrets.ts
