@@ -4,7 +4,6 @@ import { logEvents } from '../middleware/logger.middleware'
 import HttpException from '../exceptions/root'
 import InternalException from '../exceptions/InternalException'
 import BadRequestException from '../exceptions/BadRequest'
-// import { NODE_ENV as originalNodeEnv } from '../secrets'
 
 jest.mock('../middleware/logger.middleware', () => ({
   logEvents: jest.fn().mockResolvedValue(undefined),
@@ -70,23 +69,15 @@ describe('Error Middleware', () => {
   it('should include stack trace in response in development mode for operational error', async () => {
     process.env.NODE_ENV = 'development'
 
-    // jest.mock('../secrets', () => ({
-    //   NODE_ENV: 'development',
-    // }))
-
     const error = new BadRequestException('Not Found')
 
     errorMiddleware(error, req as Request, res as Response, next)
 
     expect(res.status).toHaveBeenCalledWith(400)
-
     expect(res.json).toHaveBeenCalledWith({
       message: 'Not Found',
       stack: error.stack,
       success: false,
     })
-
-    // jest.unmock('../secrets')
-    // process.env.NODE_ENV = originalNodeEnv
   })
 })
