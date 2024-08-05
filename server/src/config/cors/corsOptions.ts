@@ -8,6 +8,7 @@ const corsOptions: CorsOptions = {
   },
   // methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
   credentials: true,
+  optionsSuccessStatus: 204, // some legacy browsers does not support 204
 }
 
 export default corsOptions
