@@ -1,4 +1,6 @@
 import app from './app'
-import { PORT } from './secrets'
+import { NODE_ENV, PORT } from './secrets'
 
-app.listen(PORT, () => console.log(`Server is running at http://localhost:${PORT}`))
+app.listen(PORT, () =>
+  console.log(`Server is running at http://localhost:${PORT} in ${NODE_ENV} environment`),
+)

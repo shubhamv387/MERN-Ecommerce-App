@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from 'express'
-import errorMiddleware from '../middleware/error.middleware'
-import { logEvents } from '../middleware/logger.middleware'
-import HttpException from '../exceptions/root'
-import InternalException from '../exceptions/InternalException'
-import BadRequestException from '../exceptions/BadRequest'
+import errorMiddleware from '../../middleware/error.middleware'
+import { logEvents } from '../../middleware/logger.middleware'
+import HttpException from '../../exceptions/root'
+import InternalException from '../../exceptions/InternalException'
+import BadRequestException from '../../exceptions/BadRequest'
 
-jest.mock('../middleware/logger.middleware', () => ({
+jest.mock('../../middleware/logger.middleware', () => ({
   logEvents: jest.fn().mockResolvedValue(undefined),
 }))
 
@@ -41,7 +41,7 @@ describe('Error Middleware', () => {
 
     expect(logEvents).toHaveBeenCalledWith(
       'Error: Not Found\tGET\t/test\thttp://testing-host.com',
-      'testLog.log',
+      'errLog.log',
     )
     expect(res.status).toHaveBeenCalledWith(404)
     expect(res.json).toHaveBeenCalledWith({
@@ -57,7 +57,7 @@ describe('Error Middleware', () => {
 
     expect(logEvents).toHaveBeenCalledWith(
       'Error: Internal Server Error\tGET\t/test\thttp://testing-host.com',
-      'testLog.log',
+      'errLog.log',
     )
     expect(res.status).toHaveBeenCalledWith(500)
     expect(res.json).toHaveBeenCalledWith({

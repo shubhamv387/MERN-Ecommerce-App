@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
-import asyncHandler from '../utils/asyncHandler'
-import HttpException from '../exceptions/root'
-import InternalException from '../exceptions/InternalException'
+import asyncHandler from '../../utils/asyncHandler'
+import HttpException from '../../exceptions/root'
+import InternalException from '../../exceptions/InternalException'
 
 describe('asyncHandler', () => {
   let req: Request

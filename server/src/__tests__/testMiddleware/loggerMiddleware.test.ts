@@ -4,8 +4,8 @@ import * as fs from 'node:fs'
 import * as fsPromises from 'node:fs/promises'
 import path from 'path'
 import { NextFunction, Request, Response } from 'express'
-import { logEvents } from '../middleware/logger.middleware'
-import * as customLogs from '../middleware/logger.middleware'
+import { logEvents } from '../../middleware/logger.middleware'
+import * as customLogs from '../../middleware/logger.middleware'
 
 // Mock external modules
 jest.mock('date-fns', () => ({
@@ -72,7 +72,7 @@ describe('Logger Middleware', () => {
   it('should call the logEvents function and log the request into reqLog.log file', async () => {
     await customLogs.logger(req, res, next)
 
-    expect(mockLogEvents).toHaveBeenCalledWith('GET\t/test\thttp://testing-host.com', 'testLog.log')
+    expect(mockLogEvents).toHaveBeenCalledWith('GET\t/test\thttp://testing-host.com', 'reqLog.log')
   })
 
   it('should console.log requests to the node environment', async () => {

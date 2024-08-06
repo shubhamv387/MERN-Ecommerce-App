@@ -1,5 +1,11 @@
+import { NextFunction, Request, Response } from 'express'
 import app from '../app'
 import request from 'supertest'
+
+jest.mock('../middleware/logger.middleware', () => ({
+  logEvents: jest.fn(),
+  logger: (req: Request, res: Response, next: NextFunction) => next(),
+}))
 
 describe('Invalid route --> /invalid-route-request', () => {
   it('should give the status code as 404, and a response object containing success and message', async () => {

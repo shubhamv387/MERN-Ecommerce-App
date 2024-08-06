@@ -9,16 +9,7 @@ type ErrorResponse = {
 }
 
 export default (error: HttpException, req: Request, res: Response, _next: NextFunction) => {
-  if (process.env.NODE_ENV === 'test')
-    logEvents(
-      `${error.name}: ${error.message}\t${req.method}\t${req.url}\t${req.headers.origin}`,
-      'testLog.log',
-    )
-  else
-    logEvents(
-      `${error.name}: ${error.message}\t${req.method}\t${req.url}\t${req.headers.origin}`,
-      'errLog.log',
-    )
+  logEvents(`${error.name}: ${error.message}\t${req.method}\t${req.url}\t${req.headers.origin}`, 'errLog.log')
 
   console.log(error.stack)
 
