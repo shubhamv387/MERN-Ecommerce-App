@@ -12,7 +12,6 @@ const server = async () => {
         console.log(`Server is running at http://localhost:${PORT} in ${NODE_ENV} environment`),
       )
   } catch (error: any) {
-    console.log(NODE_ENV)
     logEvents(`${error.errno}: ${error.code}\t${error.syscall}\t${error.hostname}`, 'mongoErrLog.log')
     console.log(`${error.name}: ${error.message}`)
     process.exit(1)
