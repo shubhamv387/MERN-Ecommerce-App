@@ -7,6 +7,7 @@
     "build": "rimraf ./build && tsc",
     "start": "cross-env NODE_ENV=development nodemon",
     "test": "cross-env NODE_ENV=test jest --detectOpenHandles",
+    "test:single": "cross-env NODE_ENV=test jest src/__tests__/server.test.ts --watch --detectOpenHandles",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "format": "prettier --write \"**/*.{ts,js}\"",
@@ -21,6 +22,7 @@
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "mongoose": "^8.5.2",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
