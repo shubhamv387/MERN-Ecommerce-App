@@ -1,4 +1,12 @@
 {
   "extends": "./tsconfig",
-  "exclude": ["**/*.{test,spec}.*", "**/__mocks__/**", "**/__tests__/**", "**/jest.*.*"]
+  "exclude": [
+    "**/*.{test,spec}.*",
+    "**/__mocks__/**",
+    "**/__tests__/**",
+    "**/jest.*.*",
+    "eslint.config.mjs",
+    "coverage",
+    "logs"
+  ]
 }
