@@ -51,12 +51,12 @@ describe('Error Middleware', () => {
   })
 
   it('should log the error and send response with status code 500 for non-operational error', () => {
-    const error = new InternalException('Internal Server Error')
+    const error = new InternalException('Something went wrong!')
 
     errorMiddleware(error, req as Request, res as Response, next)
 
     expect(logEvents).toHaveBeenCalledWith(
-      'Error: Internal Server Error\tGET\t/test\thttp://testing-host.com',
+      'Error: Something went wrong!\tGET\t/test\thttp://testing-host.com',
       'errLog.log',
     )
     expect(res.status).toHaveBeenCalledWith(500)

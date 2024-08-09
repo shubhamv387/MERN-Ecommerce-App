@@ -3,12 +3,15 @@ import app from './app'
 import connectdb from './config/database'
 import { logEvents } from './middleware/logger.middleware'
 import { NODE_ENV, PORT } from './secrets'
+import { Server } from 'http'
 
-const server = async () => {
+let serverInstance: Server
+
+export const startServer = async () => {
   try {
     await connectdb()
     if (mongoose.connection.readyState === 1)
-      app.listen(PORT, () =>
+      serverInstance = app.listen(PORT, () =>
         console.log(`Server is running at http://localhost:${PORT} in ${NODE_ENV} environment`),
       )
   } catch (error: any) {
@@ -18,6 +21,8 @@ const server = async () => {
   }
 }
 
-server()
+startServer()
 
-export default server
+export const closeServer = () => {
+  if (serverInstance) serverInstance.close()
+}

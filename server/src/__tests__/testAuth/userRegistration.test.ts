@@ -122,6 +122,18 @@ describe('User registration --> POST /api/v1/auth/register', () => {
     },
   )
 
+  it('returns Error when phone number already exists', async () => {
+    const user = { ...validUser, phone: '9876543478' }
+
+    await UserModel.create(user)
+
+    const response = await postUser({ ...user, email: 'newemail@mail.com' })
+    const {
+      errors: { validationErrors },
+    } = response.body
+    expect(validationErrors.phone).toBe('phone number already exists')
+  })
+
   it('returns Error when email already exists', async () => {
     await UserModel.create({ ...validUser })
 
@@ -132,11 +144,12 @@ describe('User registration --> POST /api/v1/auth/register', () => {
     expect(validationErrors.email).toBe('E-mail already exists')
   })
 
-  it('returns errors for both E-mail already exists and password is null', async () => {
-    await UserModel.create({ ...validUser })
+  it('returns errors for both E-mail and phone number already exists and password is null', async () => {
+    await UserModel.create({ ...validUser, phone: '9875847362' })
 
     const response = await postUser({
       ...validUser,
+      phone: '9875847362',
       password: null,
     })
     const {
@@ -144,5 +157,6 @@ describe('User registration --> POST /api/v1/auth/register', () => {
     } = response.body
     expect(validationErrors.password).toBe('Password cannot be null')
     expect(validationErrors.email).toEqual('E-mail already exists')
+    expect(validationErrors.phone).toEqual('phone number already exists')
   })
 })

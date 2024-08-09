@@ -1,23 +1,22 @@
 import express from 'express'
 import * as auth from '../../controller/auth.controller'
-import {
-  validateEmail,
-  validateName,
-  validatePassword,
-  validatePhone,
-} from '../../middleware/schemaValidations/userRegistration.validation'
+import { RegistrationInputTypes, validateRegistrationInputField } from '../../validations/auth.validation'
 
 const authRouter = express.Router()
 
+const registrationFieldsArr: RegistrationInputTypes[] = [
+  { field: 'email' },
+  { field: 'password' },
+  { field: 'phone', required: false },
+  { field: 'firstName', required: false },
+  { field: 'lastName', required: false },
+]
+
 authRouter.post(
   '/register',
-  [
-    validateEmail('email'),
-    validatePassword('password'),
-    validatePhone('phone'),
-    validateName('firstName', true),
-    validateName('lastName', true),
-  ],
+  registrationFieldsArr.map((input) =>
+    validateRegistrationInputField({ field: input.field, required: input.required }),
+  ),
   auth.register,
 )
 

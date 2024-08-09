@@ -2,7 +2,7 @@ import app from '../app'
 import { PORT } from '../secrets'
 import { logEvents } from '../middleware/logger.middleware'
 import connectdb from '../config/database'
-import server from '../server'
+import { startServer } from '../server'
 
 jest.mock('../app', () => ({
   listen: jest.fn(),
@@ -29,7 +29,7 @@ describe('Server startup', () => {
     // Mocking connectdb to return a promise that resolves
     ;(connectdb as jest.Mock).mockResolvedValueOnce(undefined)
 
-    await server()
+    await startServer()
 
     expect(connectdb).toHaveBeenCalled()
     expect(app.listen).toHaveBeenCalledWith(PORT, expect.any(Function))
@@ -54,7 +54,7 @@ describe('Server startup', () => {
     // Mocking connectdb to return a promise that rejects
     ;(connectdb as jest.Mock).mockRejectedValue(mockError)
 
-    await server()
+    await startServer()
 
     expect(connectdb).toHaveBeenCalled()
     expect(mockLogEvents).toHaveBeenCalledWith(
