@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import asyncHandler from '../../utils/asyncHandler'
-import HttpException from '../../exceptions/root'
 import InternalException from '../../exceptions/InternalException'
+import NotFoundException from '../../exceptions/NotFoundException'
 
 describe('asyncHandler', () => {
   let req: Request
@@ -28,7 +28,7 @@ describe('asyncHandler', () => {
   })
 
   it('should call next() with HttpException when callback throws HttpException', async () => {
-    const error = new HttpException('Not Found', 404)
+    const error = new NotFoundException('Not Found')
     const callback = async (_req: Request, _res: Response, _next: NextFunction) => {
       throw error
     }

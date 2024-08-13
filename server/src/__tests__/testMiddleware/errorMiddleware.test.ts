@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express'
 import errorMiddleware from '../../middleware/error.middleware'
 import { logEvents } from '../../middleware/logger.middleware'
-import HttpException from '../../exceptions/root'
 import InternalException from '../../exceptions/InternalException'
 import BadRequestException from '../../exceptions/BadRequest'
+import NotFoundException from '../../exceptions/NotFoundException'
 
 jest.mock('../../middleware/logger.middleware', () => ({
   logEvents: jest.fn().mockResolvedValue(undefined),
@@ -35,7 +35,7 @@ describe('Error Middleware', () => {
   })
 
   it('should log the error and send response with status code 404', () => {
-    const error = new HttpException('Not Found', 404)
+    const error = new NotFoundException('Not Found')
 
     errorMiddleware(error, req as Request, res as Response, next)
 

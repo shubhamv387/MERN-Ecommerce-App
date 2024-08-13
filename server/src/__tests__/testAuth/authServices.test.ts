@@ -1,57 +1,114 @@
+import { Types } from 'mongoose'
 import {
+  comparePassword,
+  encryptPassword,
   generateAccessToken,
   generateRefreshToken,
+  generateTokens,
   UserPayloadType,
   verifyAccessToken,
   verifyRefreshToken,
 } from '../../services/auth.services'
+import HttpException from '../../exceptions/root'
+import { Role } from '../../types/user.types'
 
 const validPayload: UserPayloadType = {
-  userId: '66b5f92656548ce5cf5bad56',
+  userId: new Types.ObjectId(),
+  role: Role.Customer,
 }
 
 const invalidToken: string = 'providingAnInvalidToken'
 
 describe('Auth Services -->', () => {
-  it('should generate access token', () => {
-    const token = generateAccessToken(validPayload)
+  describe('Token generation and verification -->', () => {
+    it('generateAccessToken --> should generate access token', () => {
+      const token = generateAccessToken(validPayload)
 
-    expect(typeof token).toBe('string')
+      expect(typeof token).toBe('string')
+    })
+
+    it('generateRefreshToken --> should generate refresh token', () => {
+      const token = generateRefreshToken(validPayload)
+
+      expect(typeof token).toBe('string')
+    })
+
+    it('generateTokens --> should generate access and refresh tokens', () => {
+      const token = generateTokens(validPayload)
+      expect(Object.keys(token)).toHaveLength(2)
+      expect(Object.keys(token)).toEqual(expect.arrayContaining(['accessToken', 'refreshToken']))
+      expect(typeof token.accessToken).toBe('string')
+      expect(typeof token.refreshToken).toBe('string')
+    })
+
+    it('verifyAccessToken --> should return the payload object when access token is valid', () => {
+      const validToken = generateAccessToken(validPayload)
+      const result = verifyAccessToken(validToken)
+
+      expect(typeof result).toBe('object')
+      expect(Object.keys(result)).toHaveLength(4)
+      expect(Object.keys(result)).toStrictEqual(expect.arrayContaining(['userId', 'role', 'iat', 'exp']))
+      expect(result!.userId).toEqual(validPayload.userId.toString())
+    })
+
+    it('verifyRefreshToken --> should return the payload object when refresh token is valid', () => {
+      const validToken = generateRefreshToken(validPayload)
+      const result = verifyRefreshToken(validToken)
+
+      expect(typeof result).toBe('object')
+      expect(Object.keys(result)).toHaveLength(4)
+      expect(Object.keys(result)).toStrictEqual(expect.arrayContaining(['userId', 'role', 'iat', 'exp']))
+      expect(result!.userId).toEqual(validPayload.userId.toString())
+    })
+
+    it('verifyAccessToken --> should throw an HttpException when access token is invalid', () => {
+      try {
+        verifyAccessToken(invalidToken)
+      } catch (error: any) {
+        expect(error).toBeInstanceOf(HttpException)
+        expect(error.message).toBe('Invalid Token')
+        expect(error.statusCode).toBe(498)
+      }
+    })
+
+    it('verifyRefreshToken --> should throw an HttpException when refresh token is invalid', () => {
+      try {
+        verifyRefreshToken(invalidToken)
+      } catch (error: any) {
+        expect(error).toBeInstanceOf(HttpException)
+        expect(error.message).toBe('Invalid Token')
+        expect(error.statusCode).toBe(498)
+      }
+    })
   })
 
-  it('should return the payload object when access token is valid', () => {
-    const validToken = generateAccessToken(validPayload)
-    const result: UserPayloadType | null = verifyAccessToken(validToken)
+  describe('Password encryption and verification -->', () => {
+    it('encryptPassword --> should return the encrypted password', async () => {
+      const password = 'Password1'
+      const hashedPassword = await encryptPassword(password)
 
-    expect(typeof result).toBe('object')
-    expect(result).toHaveProperty('userId')
-    expect(result!.userId).toEqual(validPayload.userId)
-  })
+      expect(hashedPassword).not.toEqual(password)
+    })
 
-  it('should return null when access token is invalid', () => {
-    const result: UserPayloadType | null = verifyAccessToken(invalidToken)
+    it('comparePassword --> should return true if the provided password is valid', async () => {
+      const password = 'Password1'
+      const hashedPassword = await encryptPassword(password)
 
-    expect(result).toBeNull()
-  })
+      const isMatchedPassword = await comparePassword(password, hashedPassword)
 
-  it('should generate refresh token', () => {
-    const token = generateRefreshToken(validPayload)
+      expect(typeof isMatchedPassword).toBe('boolean')
+      expect(isMatchedPassword).toBeTruthy()
+    })
 
-    expect(typeof token).toBe('string')
-  })
+    it('comparePassword --> should return false if the provided password is invalid', async () => {
+      const password = 'Password1'
+      const invalidPassword = 'invalidPassword'
+      const hashedPassword = await encryptPassword(password)
 
-  it('should return the payload object when refresh token is valid', () => {
-    const validToken = generateRefreshToken(validPayload)
-    const result: UserPayloadType | null = verifyRefreshToken(validToken)
+      const isMatchedPassword = await comparePassword(invalidPassword, hashedPassword)
 
-    expect(typeof result).toBe('object')
-    expect(result).toHaveProperty('userId')
-    expect(result!.userId).toEqual(validPayload.userId)
-  })
-
-  it('should return null when refresh token is invalid', () => {
-    const result: UserPayloadType | null = verifyRefreshToken(invalidToken)
-
-    expect(result).toBeNull()
+      expect(typeof isMatchedPassword).toBe('boolean')
+      expect(isMatchedPassword).toBeFalsy()
+    })
   })
 })

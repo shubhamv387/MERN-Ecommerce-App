@@ -3,6 +3,9 @@ import app from '../../app'
 import UserModel from '../../models/User.model'
 import { closeServer, startServer } from '../../server'
 import { NextFunction, Request, Response } from 'express'
+import InternalException from '../../exceptions/InternalException'
+import HttpException from '../../exceptions/root'
+import { Role } from '../../types/user.types'
 
 jest.mock('../../middleware/logger.middleware', () => ({
   logEvents: jest.fn(),
@@ -21,9 +24,11 @@ type User = {
   phone?: string | null | undefined
   firstName?: string | null | undefined
   lastName?: string | null | undefined
+  role?: Role
 }
 
 type RegisterInputFields = 'email' | 'password' | 'phone' | 'firstName' | 'lastName'
+
 type MultiTestTypes = {
   field: RegisterInputFields
   value: any
@@ -159,4 +164,58 @@ describe('User registration --> POST /api/v1/auth/register', () => {
     expect(validationErrors.email).toEqual('E-mail already exists')
     expect(validationErrors.phone).toEqual('phone number already exists')
   })
+
+  it('returns error when user is not stored into the database', async () => {
+    const postUser = jest.fn(async () => {
+      throw new InternalException('Unable to register new user, please try again later')
+    })
+    try {
+      await postUser()
+      const savedUser = await UserModel.findOne({ email: validUser.email })
+      expect(savedUser).toBe(null)
+    } catch (error: any) {
+      expect(error).toBeInstanceOf(HttpException)
+      expect(error.message).toBe('Unable to register new user, please try again later')
+      expect(error.statusCode).toBe(500)
+    }
+  })
+
+  /* ------------------------------------------------------------------------ */
+
+  it('hashes the password then storing user data with hashed password to the database', async () => {
+    await postUser()
+    const savedUser = await UserModel.findOne({ email: validUser.email })
+
+    expect(savedUser!.email).toBe(validUser.email)
+    expect(savedUser!.password).not.toBe(validUser.password)
+    expect(savedUser!).toHaveProperty('role')
+    expect(savedUser!.role).toEqual(Role.Customer)
+  })
+
+  it('saves the user to database', async () => {
+    await postUser()
+    const userList = await UserModel.find()
+    expect(userList.length).toBe(1)
+  })
+
+  it('returns 201 when new user created successfully', async () => {
+    const response = await postUser()
+    expect(response.status).toBe(201)
+  })
+
+  it('returns something in response body when new user created successfully', async () => {
+    const response = await postUser()
+
+    expect(Object.keys(response.body)).toHaveLength(4)
+    expect(Object.keys(response.body)).toEqual(
+      expect.arrayContaining(['success', 'message', 'user', 'token']),
+    )
+  })
+
+  it('returns success true when new user created successfully', async () => {
+    const response = await postUser()
+    expect(response.body.success).toBeTruthy()
+  })
+
+  /* ----------------------------------------------------------------------- */
 })

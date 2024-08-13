@@ -8,7 +8,7 @@ import v1RootRouter from './routes/v1'
 import corsOptions from './config/cors/corsOptions'
 import { logger } from './middleware/logger.middleware'
 import errorMiddleware from './middleware/error.middleware'
-import HttpException from './exceptions/root'
+import NotFoundException from './exceptions/NotFoundException'
 
 const app: Express = express()
 
@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: false }))
 app.use('/api/v1', v1RootRouter)
 
 app.use((req: Request, _res, _next) => {
-  throw new HttpException(`Requested URL ${req.path} not found!`, 404)
+  throw new NotFoundException(`Requested URL ${req.path} not found!`)
 })
 
 // Error Handling Middleware

@@ -12,6 +12,7 @@ describe('Invalid route --> /invalid-route-request', () => {
     const response = await request(app).get('/invalid-route')
 
     expect(response.statusCode).toBe(404)
+    expect(Object.keys(response.body)).toHaveLength(2)
     expect(Object.keys(response.body)).toEqual(expect.arrayContaining(['message', 'success']))
   })
 

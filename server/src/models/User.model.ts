@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { UserDocument } from '../types/user.types'
+import { Gender, Role, UserDocument } from '../types/user.types'
 
 const userSchema = new mongoose.Schema(
   {
@@ -11,11 +11,11 @@ const userSchema = new mongoose.Schema(
     profileUrl: { type: String },
     role: {
       type: String,
-      enum: { values: ['admin', 'customer'] },
-      default: 'customer',
+      enum: { values: Object.values(Role) },
+      default: Role.Customer,
       required: true,
     },
-    gender: { type: String, enum: { values: ['male', 'female', 'other'] } },
+    gender: { type: String, enum: { values: Object.values(Gender) } },
   },
   { timestamps: true },
 )

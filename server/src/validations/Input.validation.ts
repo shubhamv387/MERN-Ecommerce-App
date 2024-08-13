@@ -1,6 +1,4 @@
 import { check } from 'express-validator'
-import UserModel from '../models/User.model'
-import BadRequestException from '../exceptions/BadRequest'
 
 export const validateNameField = (field: string, required: boolean = true) => {
   let validationChain = check(field)
@@ -44,7 +42,6 @@ export const validatePhoneField = (field: string, required: boolean = true) => {
   }
 
   return validationChain
-    .optional()
     .isLength({ min: 10, max: 10 })
     .withMessage('Must be 10 digits long')
     .bail()
@@ -54,10 +51,6 @@ export const validatePhoneField = (field: string, required: boolean = true) => {
     .matches(/^[6-9]/)
     .withMessage('Must start with a digit between 6 and 9')
     .bail()
-    .custom(async (phone) => {
-      const existingUser = await UserModel.findOne({ phone })
-      if (existingUser) throw new BadRequestException('phone number already exists')
-    })
 }
 
 export const validatePasswordField = (field: string) =>

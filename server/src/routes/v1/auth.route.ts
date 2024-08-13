@@ -1,23 +1,13 @@
 import express from 'express'
 import * as auth from '../../controller/auth.controller'
-import { RegistrationInputTypes, validateRegistrationInputField } from '../../validations/auth.validation'
+import { validateLoginInputField, validateRegisterInputField } from '../../validations/auth.validation'
+import loginLimiter from '../../middleware/loginLimit'
 
 const authRouter = express.Router()
 
-const registrationFieldsArr: RegistrationInputTypes[] = [
-  { field: 'email' },
-  { field: 'password' },
-  { field: 'phone', required: false },
-  { field: 'firstName', required: false },
-  { field: 'lastName', required: false },
-]
-
-authRouter.post(
-  '/register',
-  registrationFieldsArr.map((input) =>
-    validateRegistrationInputField({ field: input.field, required: input.required }),
-  ),
-  auth.register,
-)
+authRouter.post('/register', validateRegisterInputField, auth.register)
+authRouter.post('/login', loginLimiter, validateLoginInputField, auth.login)
+authRouter.get('/refresh-token', auth.refreshToken)
+authRouter.post('/logout', auth.logout)
 
 export default authRouter
