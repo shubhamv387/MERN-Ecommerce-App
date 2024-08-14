@@ -10,13 +10,13 @@ export interface UserPayloadType {
   role: Role
 }
 
-const generateToken = (payload: UserPayloadType, secretKey: string, expiresIn: string): string => {
+export const generateToken = (payload: string | object, secretKey: string, expiresIn: string): string => {
   return jwt.sign(payload, secretKey, { expiresIn })
 }
 
-const verifyToken = (token: string, secretKey: string): UserPayloadType => {
+const verifyToken = (token: string, secretKey: string) => {
   try {
-    return jwt.verify(token, secretKey) as UserPayloadType
+    return jwt.verify(token, secretKey)
   } catch (error: any) {
     console.log('Token verification failed:', error.message)
     throw new HttpException('Invalid Token', 498)

@@ -49,8 +49,8 @@ export const validateRegisterInputField = registrationFieldsArr.map((input) =>
 )
 
 export const validateLoginInputField = [
-  body().custom(({ email, phone }) => {
-    if (!email && !phone) {
+  body('error').custom((value, { req }) => {
+    if (req.body.email === undefined && req.body.phone === undefined) {
       throw new BadRequestException('Either email or phone must be provided')
     }
     return true
@@ -58,4 +58,25 @@ export const validateLoginInputField = [
   validateEmailField('email', false),
   validatePhoneField('phone', false),
   validatePasswordField('password'),
+]
+
+export const validateSendResetPassLinkInputField = [
+  body('error').custom((value, { req }) => {
+    if (req.body.email === undefined && req.body.phone === undefined) {
+      throw new BadRequestException('Either email or phone must be provided')
+    }
+    return true
+  }),
+  validateEmailField('email', false),
+  validatePhoneField('phone', false),
+]
+
+export const validateResetPassInputField = [
+  validatePasswordField('password'),
+  validatePasswordField('confirmPassword').custom((confirmPassword, { req }) => {
+    if (confirmPassword !== req.body.password) {
+      throw new BadRequestException('Passwords do not match')
+    }
+    return true
+  }),
 ]

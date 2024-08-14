@@ -1,13 +1,9 @@
 import { check } from 'express-validator'
 
 export const validateNameField = (field: string, required: boolean = true) => {
-  let validationChain = check(field)
-
-  if (!required) {
-    validationChain = validationChain.optional()
-  }
-
-  return validationChain
+  return check(field)
+    .optional(!required)
+    .notEmpty()
     .isLength({ min: 2 })
     .withMessage('Must have at least 2 characters')
     .bail()
@@ -19,13 +15,8 @@ export const validateNameField = (field: string, required: boolean = true) => {
 }
 
 export const validateEmailField = (field: string, required: boolean = true) => {
-  let validationChain = check(field)
-
-  if (!required) {
-    validationChain = validationChain.optional()
-  }
-
-  return validationChain
+  return check(field)
+    .optional(!required)
     .notEmpty()
     .withMessage('E-mail cannot be null')
     .bail()
@@ -35,13 +26,11 @@ export const validateEmailField = (field: string, required: boolean = true) => {
 }
 
 export const validatePhoneField = (field: string, required: boolean = true) => {
-  let validationChain = check(field)
-
-  if (!required) {
-    validationChain = validationChain.optional()
-  }
-
-  return validationChain
+  return check(field)
+    .optional(!required)
+    .notEmpty()
+    .withMessage('Phone cannot be null')
+    .bail()
     .isLength({ min: 10, max: 10 })
     .withMessage('Must be 10 digits long')
     .bail()
@@ -53,8 +42,8 @@ export const validatePhoneField = (field: string, required: boolean = true) => {
     .bail()
 }
 
-export const validatePasswordField = (field: string) =>
-  check(field)
+export const validatePasswordField = (field: string) => {
+  return check(field)
     .notEmpty()
     .withMessage('Password cannot be null')
     .bail()
@@ -63,3 +52,4 @@ export const validatePasswordField = (field: string) =>
     .bail()
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters')
+}

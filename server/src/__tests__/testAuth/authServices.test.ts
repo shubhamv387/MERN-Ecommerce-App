@@ -43,7 +43,7 @@ describe('Auth Services -->', () => {
 
     it('verifyAccessToken --> should return the payload object when access token is valid', () => {
       const validToken = generateAccessToken(validPayload)
-      const result = verifyAccessToken(validToken)
+      const result = verifyAccessToken(validToken) as { userId: string }
 
       expect(typeof result).toBe('object')
       expect(Object.keys(result)).toHaveLength(4)
@@ -53,7 +53,7 @@ describe('Auth Services -->', () => {
 
     it('verifyRefreshToken --> should return the payload object when refresh token is valid', () => {
       const validToken = generateRefreshToken(validPayload)
-      const result = verifyRefreshToken(validToken)
+      const result = verifyRefreshToken(validToken) as { userId: string }
 
       expect(typeof result).toBe('object')
       expect(Object.keys(result)).toHaveLength(4)

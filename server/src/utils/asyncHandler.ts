@@ -6,10 +6,10 @@ type ControllerMethod = (req: Request, res: Response, next: NextFunction) => Pro
 
 const asyncHandler = (callback: ControllerMethod) => (req: Request, res: Response, next: NextFunction) =>
   callback(req, res, next).catch((error: any) => {
+    // console.log(error.message)
     let exception: HttpException
     if (error instanceof HttpException) exception = error
     else exception = new InternalException('Something went wrong!')
-
     next(exception)
   })
 

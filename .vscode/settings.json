@@ -1,5 +1,15 @@
 {
-  "cSpell.words": ["connectdb", "ecommerce", "Shubham", "tseslint", "unmock", "Vishwakarma"],
+  "cSpell.words": [
+    "BREVO",
+    "connectdb",
+    "ecommerce",
+    "getbrevo",
+    "Shubham",
+    "Transac",
+    "tseslint",
+    "unmock",
+    "Vishwakarma"
+  ],
   "prettier.singleQuote": true,
   "prettier.semi": false,
   "prettier.endOfLine": "lf",

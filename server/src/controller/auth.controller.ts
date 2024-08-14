@@ -1,23 +1,28 @@
 import { CookieOptions, Request, Response } from 'express'
 import asyncHandler from '../utils/asyncHandler'
-import { validationResult } from 'express-validator'
 import UserModel from '../models/User.model'
 import {
-  encryptPassword,
-  generateTokens,
   comparePassword,
-  verifyRefreshToken,
+  encryptPassword,
+  generateToken,
+  generateTokens,
   generateAccessToken,
+  verifyRefreshToken,
+  UserPayloadType,
 } from '../services/auth.services'
 import { LoginUserType, RegisterUserType } from '../types/auth.types'
 import userServices from '../services/user.services'
 import BadRequestException from '../exceptions/BadRequest'
 import InternalException from '../exceptions/InternalException'
 import UnauthorizedException from '../exceptions/UnauthorizedException'
-import ValidationException from '../exceptions/ValidationException'
 import HttpException from '../exceptions/root'
 import ForbiddenException from '../exceptions/ForbiddenException'
 import { UserDocument } from '../types/user.types'
+import { JWT_SECRET_KEY } from '../secrets'
+import { verify } from 'jsonwebtoken'
+import { Types } from 'mongoose'
+import handleValidationError from '../utils/handleValidationError'
+import sendMail, { SendMailOptionsType } from '../utils/sendMail'
 
 const cookieOptions: CookieOptions = {
   httpOnly: true,
@@ -30,15 +35,7 @@ const cookieOptions: CookieOptions = {
 // @route   POST /api/v1/auth/register
 // @access  Public
 export const register = asyncHandler(async (req: Request, res: Response) => {
-  const errors = validationResult(req)
-  if (!errors.isEmpty()) {
-    const validationErrors: { [key: string]: string } = {}
-    errors.array().forEach((error: any) => {
-      validationErrors[error.path] = error.msg
-    })
-
-    throw new ValidationException('validation errors', 400, { validationErrors })
-  }
+  handleValidationError(req)
 
   // 1. Getting the user data from req.body
   const userData = req.body as RegisterUserType
@@ -76,16 +73,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 // @access  Public
 export const login = asyncHandler(async (req: Request, res: Response) => {
   // 1. Check for the validation errors and if any error found return it back
-  const errors = validationResult(req)
-
-  if (!errors.isEmpty()) {
-    const validationErrors: { [key: string]: string } = {}
-    errors.array().forEach((error: any) => {
-      validationErrors[error.path] = error.msg
-    })
-
-    throw new ValidationException('validation errors', 400, { validationErrors })
-  }
+  handleValidationError(req)
 
   // 2. Getting the user data from req.body
   const userData = req.body as LoginUserType
@@ -112,13 +100,13 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 })
 
 // @desc    Refresh Token
-// @route   POST /api/v1/auth/refresh-token
+// @route   GET /api/v1/auth/refresh-token
 // @access  Public
 export const refreshToken = asyncHandler(async (req: Request, res: Response) => {
   const cookie = req.cookies
   if (!cookie?.jwt) throw new ForbiddenException('Forbidden')
 
-  const decoded = verifyRefreshToken(cookie.jwt)
+  const decoded = verifyRefreshToken(cookie.jwt) as UserPayloadType
   const foundUser = await userServices.findById(decoded.userId).select('role')
   if (!foundUser) throw new UnauthorizedException('Unauthorized')
 
@@ -136,4 +124,65 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
   if (!cookie?.jwt) throw new HttpException('No Content', 204)
   res.clearCookie('jwt', { expires: new Date(0) })
   return res.status(200).json({ success: true, message: 'Logout successful' })
+})
+
+// @desc    Reset Password using email --> sending token valid for 15m
+// @route   POST /api/v1/auth/reset-password
+// @access  Public
+export const sendResetPassLink = asyncHandler(async (req: Request, res: Response) => {
+  // 1. Check for the validation errors and if any error found return it back
+  handleValidationError(req)
+
+  // 2. Getting the user data from req.body
+  const userData: { email: string; phone: string } = req.body
+
+  // 3. Extracting the existing user from database
+  let foundUser: UserDocument | null
+  if (userData.email) foundUser = await userServices.findByEmail(userData.email)
+  else foundUser = await userServices.findByPhone(userData.phone!)
+
+  if (!foundUser) throw new BadRequestException('User does not exists')
+
+  const token = generateToken({ userId: foundUser._id }, JWT_SECRET_KEY, '15m')
+
+  // this will be the frontend reset password link attaching token with it
+  const path = `http://localhost:3500/reset-password?token=${token}`
+
+  const htmlContent = `<p><b>Please click the link given below to reset your password</b></p><a href="${path}">Reset Password</a>`
+
+  const sendMailOptions: SendMailOptionsType = {
+    subject: 'Reset password link',
+    textContent: 'Click here to reset your password',
+    htmlContent,
+    receivers: [{ name: foundUser.firstName || '', email: foundUser.email }],
+  }
+
+  await sendMail(sendMailOptions)
+
+  return res
+    .status(200)
+    .json({ success: true, message: 'Reset password link sent successfully on your email' })
+})
+
+// @desc    Reset Password using email or phone
+// @route   PUT /api/v1/auth/reset-password?token=${token}
+// @access  Public
+export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
+  handleValidationError(req)
+
+  const userData: { password: string; confirmPassword: string } = req.body
+  const token: string = req.query.token as string
+
+  let decode
+  try {
+    decode = verify(token, JWT_SECRET_KEY) as { userId: Types.ObjectId }
+  } catch (error: any) {
+    throw new BadRequestException('Link expired! Request new link')
+  }
+
+  const hashedPassword = await encryptPassword(userData.password)
+
+  await UserModel.findByIdAndUpdate(decode.userId, { password: hashedPassword }, { new: true })
+
+  return res.status(200).json({ success: true, message: 'Password updated successfully' })
 })

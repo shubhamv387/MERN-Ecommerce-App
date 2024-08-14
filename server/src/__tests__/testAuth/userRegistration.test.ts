@@ -97,12 +97,15 @@ describe('User registration --> POST /api/v1/auth/register', () => {
     ${'password'}  | ${'lowerAndUPPER'}   | ${'Password must have at least 1 uppercase, 1 lowercase, and 1 number character'}
     ${'password'}  | ${'lowerand123'}     | ${'Password must have at least 1 uppercase, 1 lowercase, and 1 number character'}
     ${'password'}  | ${'UPPERAND123'}     | ${'Password must have at least 1 uppercase, 1 lowercase, and 1 number character'}
+    ${'firstName'} | ${null}              | ${'Must have at least 2 characters'}
     ${'firstName'} | ${'f'}               | ${'Must have at least 2 characters'}
     ${'firstName'} | ${'f'.repeat(33)}    | ${'Must have a maximum of 32 characters'}
     ${'firstName'} | ${'User@123'}        | ${'Must contain only alphabetic characters'}
+    ${'lastName'}  | ${null}              | ${'Must have at least 2 characters'}
     ${'lastName'}  | ${'l'}               | ${'Must have at least 2 characters'}
     ${'lastName'}  | ${'l'.repeat(33)}    | ${'Must have a maximum of 32 characters'}
     ${'lastName'}  | ${'User@123'}        | ${'Must contain only alphabetic characters'}
+    ${'phone'}     | ${null}              | ${'Phone cannot be null'}
     ${'phone'}     | ${'1234'}            | ${'Must be 10 digits long'}
     ${'phone'}     | ${'123456789012345'} | ${'Must be 10 digits long'}
     ${'phone'}     | ${'abcASD@123'}      | ${'Must contain only numeric characters'}
