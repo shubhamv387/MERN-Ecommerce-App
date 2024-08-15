@@ -6,7 +6,7 @@ import {
   validateResetPassInputField,
   validateSendResetPassLinkInputField,
 } from '../../validations/auth.validation'
-import loginLimiter from '../../middleware/loginLimit'
+import loginLimiter from '../../middleware/loginLimiter'
 
 const authRouter = express.Router()
 

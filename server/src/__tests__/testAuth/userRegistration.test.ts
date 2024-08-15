@@ -45,7 +45,7 @@ const postUser = (user = validUser): Promise<any> => {
 }
 
 describe('User registration --> POST /api/v1/auth/register', () => {
-  beforeEach(() => UserModel.collection.deleteMany({}))
+  beforeEach(async () => await UserModel.collection.deleteMany({}))
 
   it('returns 400 when required input field is null', async () => {
     const response = await postUser({
