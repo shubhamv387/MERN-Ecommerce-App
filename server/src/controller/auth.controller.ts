@@ -23,6 +23,7 @@ import { verify } from 'jsonwebtoken'
 import { Types } from 'mongoose'
 import handleValidationError from '../utils/handleValidationError'
 import sendMail, { SendMailOptionsType } from '../utils/sendMail'
+import NotFoundException from '../exceptions/NotFoundException'
 
 const cookieOptions: CookieOptions = {
   httpOnly: true,
@@ -45,8 +46,11 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 
   // 3. Creating a new instance of User model with user data
   const user = new UserModel({
-    ...userData,
+    email: userData.email,
     password: encryptedPass,
+    phone: userData.phone || '',
+    firstName: userData.firstName || '',
+    lastName: userData.lastName || '',
   })
 
   // 4. Saving the user into the database
@@ -139,16 +143,16 @@ export const sendResetPassLink = asyncHandler(async (req: Request, res: Response
   // 3. Extracting the existing user from database
   let foundUser: UserDocument | null
   if (userData.email) foundUser = await userServices.findByEmail(userData.email)
-  else foundUser = await userServices.findByPhone(userData.phone!)
+  else foundUser = await userServices.findByPhone(userData.phone)
 
-  if (!foundUser) throw new BadRequestException('User does not exists')
+  if (!foundUser) throw new NotFoundException('User does not exists')
 
   const token = generateToken({ userId: foundUser._id }, JWT_SECRET_KEY, '15m')
 
-  // this will be the frontend reset password link attaching token with it
+  // this will be the frontend reset password link with attached token
   const path = `http://localhost:3500/reset-password?token=${token}`
 
-  const htmlContent = `<p><b>Please click the link given below to reset your password</b></p><a href="${path}">Reset Password</a>`
+  const htmlContent = `<p><b>Please click the link given below to reset your password</b></p><a href="${path}">Reset Password</a></br><p>This link will be valid for 15 minutes only</p>`
 
   const sendMailOptions: SendMailOptionsType = {
     subject: 'Reset password link',
@@ -161,7 +165,7 @@ export const sendResetPassLink = asyncHandler(async (req: Request, res: Response
 
   return res
     .status(200)
-    .json({ success: true, message: 'Reset password link sent successfully on your email' })
+    .json({ success: true, message: 'Reset password link has been sent successfully on your email' })
 })
 
 // @desc    Reset Password using email or phone

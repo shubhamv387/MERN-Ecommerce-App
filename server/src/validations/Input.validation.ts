@@ -1,9 +1,17 @@
 import { check } from 'express-validator'
+import { Role } from '../types/user.types'
 
-export const validateNameField = (field: string, required: boolean = true) => {
+type ValidatePropTypes = {
+  field: string
+  label: string
+  required?: boolean
+}
+
+export const validateNameField = ({ field, label, required = true }: ValidatePropTypes) => {
   return check(field)
     .optional(!required)
     .notEmpty()
+    .withMessage(`${label} cannot be null`)
     .isLength({ min: 2 })
     .withMessage('Must have at least 2 characters')
     .bail()
@@ -14,22 +22,22 @@ export const validateNameField = (field: string, required: boolean = true) => {
     .withMessage('Must contain only alphabetic characters')
 }
 
-export const validateEmailField = (field: string, required: boolean = true) => {
+export const validateEmailField = ({ field, label, required = true }: ValidatePropTypes) => {
   return check(field)
     .optional(!required)
     .notEmpty()
-    .withMessage('E-mail cannot be null')
+    .withMessage(`${label} cannot be null`)
     .bail()
     .isEmail()
-    .withMessage('E-mail is not valid')
+    .withMessage(`${label} is not valid`)
     .bail()
 }
 
-export const validatePhoneField = (field: string, required: boolean = true) => {
+export const validatePhoneField = ({ field, label, required = true }: ValidatePropTypes) => {
   return check(field)
     .optional(!required)
     .notEmpty()
-    .withMessage('Phone cannot be null')
+    .withMessage(`${label} cannot be null`)
     .bail()
     .isLength({ min: 10, max: 10 })
     .withMessage('Must be 10 digits long')
@@ -42,14 +50,35 @@ export const validatePhoneField = (field: string, required: boolean = true) => {
     .bail()
 }
 
-export const validatePasswordField = (field: string) => {
+export const validatePasswordField = ({ field, label }: ValidatePropTypes) => {
   return check(field)
     .notEmpty()
-    .withMessage('Password cannot be null')
+    .withMessage(`${label} cannot be null`)
     .bail()
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/)
-    .withMessage('Password must have at least 1 uppercase, 1 lowercase, and 1 number character')
+    .withMessage(`${label} must have at least 1 uppercase, 1 lowercase, and 1 number character`)
     .bail()
     .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters')
+    .withMessage(`${label} must be at least 6 characters`)
+    .bail()
+}
+
+export const validateImageUrlField = ({ field, label, required = true }: ValidatePropTypes) => {
+  return check(field)
+    .optional(!required)
+    .notEmpty()
+    .withMessage(`${label} cannot be null`)
+    .bail()
+    .matches(/^(https?:\/\/)[^\s/$.?#].[^\s]*\.(jpg|jpeg|png)$/i)
+    .withMessage(`${label} is invalid`)
+    .isLength({ max: 255 })
+    .withMessage(`${label} is invalid`)
+    .bail()
+}
+
+export const validateRoleField = ({ field, label = 'Role', required = false }: ValidatePropTypes) => {
+  return check(field)
+    .optional(!required)
+    .isIn(Object.values(Role))
+    .withMessage(`This ${label} does not exist`)
 }

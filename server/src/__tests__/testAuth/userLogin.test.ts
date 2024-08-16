@@ -41,7 +41,7 @@ const validUser: User = {
   phone: '8976543659',
 }
 
-const postUser = (user = validUser): Promise<any> => {
+const loginUser = (user = validUser): Promise<any> => {
   return request(app).post('/api/v1/auth/login').send(user).expect('Content-Type', /json/)
 }
 
@@ -54,7 +54,7 @@ describe('User login --> POST /api/v1/auth/login', () => {
   })
 
   it('returns 400 when required input field is null', async () => {
-    const response = await postUser({
+    const response = await loginUser({
       ...validUser,
       password: 'Password',
       phone: null,
@@ -64,7 +64,7 @@ describe('User login --> POST /api/v1/auth/login', () => {
   })
 
   it('returns validationErrors field in response body when validation Error occurs', async () => {
-    const response = await postUser({
+    const response = await loginUser({
       ...validUser,
       password: null,
     })
@@ -77,7 +77,7 @@ describe('User login --> POST /api/v1/auth/login', () => {
   })
 
   it('returns errors when email and password is null and phone is not provided', async () => {
-    const response = await postUser({
+    const response = await loginUser({
       ...validUser,
       password: null,
       email: null,
@@ -91,7 +91,7 @@ describe('User login --> POST /api/v1/auth/login', () => {
   })
 
   it('returns errors when phone and password is null and email is not provided', async () => {
-    const response = await postUser({
+    const response = await loginUser({
       ...validUser,
       password: null,
       phone: null,
@@ -105,7 +105,7 @@ describe('User login --> POST /api/v1/auth/login', () => {
   })
 
   it('returns errors when email and phone both is not provided and password is null', async () => {
-    const response = await postUser({
+    const response = await loginUser({
       ...validUser,
       password: null,
       phone: undefined,
@@ -152,25 +152,36 @@ describe('User login --> POST /api/v1/auth/login', () => {
         body: {
           errors: { validationErrors },
         },
-      } = await postUser(user)
+      } = await loginUser(user)
 
       expect(validationErrors[field]).toBe(expectedMessage)
     },
   )
 
   it('returns Error when email does not exists', async () => {
-    const user = { ...validUser, email: 'newemail@mail.com' }
+    const user = { ...validUser, email: 'newemail@mail.com' } // this email does not exists
 
-    const response = await postUser({ ...user, phone: undefined })
+    const response = await loginUser({ ...user, phone: undefined })
     const { success, message } = response.body
 
     expect(success).toBeFalsy()
     expect(message).toBe('Invalid credentials')
   })
-  it('returns Error when phone number does not exists', async () => {
-    const user = { ...validUser, phone: '9876543478' }
 
-    const response = await postUser({ ...user, email: undefined })
+  it('returns Error when phone number does not exists', async () => {
+    const user = { ...validUser, phone: '9876543478' } // this phone does not exists
+
+    const response = await loginUser({ ...user, email: undefined })
+    const { success, message } = response.body
+
+    expect(success).toBeFalsy()
+    expect(message).toBe('Invalid credentials')
+  })
+
+  it('returns Error when provided password is incorrect', async () => {
+    const user = { ...validUser, password: 'Incorrect-password-1' }
+
+    const response = await loginUser({ ...user, email: undefined })
     const { success, message } = response.body
 
     expect(success).toBeFalsy()
@@ -180,19 +191,19 @@ describe('User login --> POST /api/v1/auth/login', () => {
   /* ------------------------------------------------------------------------ */
 
   it('returns 200 when user logged in successfully', async () => {
-    const response = await postUser()
+    const response = await loginUser()
     expect(response.status).toBe(200)
   })
 
   it('returns something in response body when user logged in successfully', async () => {
-    const response = await postUser()
+    const response = await loginUser()
 
     expect(Object.keys(response.body)).toHaveLength(3)
     expect(Object.keys(response.body)).toEqual(expect.arrayContaining(['success', 'message', 'token']))
   })
 
   it('returns success true when user logged in successfully', async () => {
-    const response = await postUser()
+    const response = await loginUser()
     expect(response.body.success).toBeTruthy()
   })
 

@@ -10,26 +10,26 @@ import AlreadyExistException from '../exceptions/AlreadyExistException'
 import { RegistrationInputTypes } from '../types/auth.types'
 import { body } from 'express-validator'
 
-const validateRegistrationInputField = ({ field, required = true }: RegistrationInputTypes) => {
+const validateRegistrationInputField = ({ field, label, required = true }: RegistrationInputTypes) => {
   switch (field) {
     case 'email':
-      return validateEmailField(field).custom(async (email) => {
+      return validateEmailField({ field, label }).custom(async (email) => {
         const existingUser = await UserModel.findOne({ email })
         if (existingUser) throw new AlreadyExistException('E-mail already exists')
       })
 
     case 'password':
-      return validatePasswordField(field)
+      return validatePasswordField({ field, label })
 
     case 'phone':
-      return validatePhoneField(field, required).custom(async (phone) => {
+      return validatePhoneField({ field, label, required }).custom(async (phone) => {
         const existingUser = await UserModel.findOne({ phone })
         if (existingUser) throw new AlreadyExistException('phone number already exists')
       })
 
     case 'firstName':
     case 'lastName':
-      return validateNameField(field, required)
+      return validateNameField({ field, label, required })
 
     default:
       throw new BadRequestException(`Unexpected field: ${field}`)
@@ -37,15 +37,15 @@ const validateRegistrationInputField = ({ field, required = true }: Registration
 }
 
 const registrationFieldsArr: RegistrationInputTypes[] = [
-  { field: 'email' },
-  { field: 'password' },
-  { field: 'phone', required: false },
-  { field: 'firstName', required: false },
-  { field: 'lastName', required: false },
+  { field: 'email', label: 'E-mail' },
+  { field: 'password', label: 'Password' },
+  { field: 'phone', required: false, label: 'Phone' },
+  { field: 'firstName', required: false, label: 'First Name' },
+  { field: 'lastName', required: false, label: 'Last Name' },
 ]
 
 export const validateRegisterInputField = registrationFieldsArr.map((input) =>
-  validateRegistrationInputField({ field: input.field, required: input.required }),
+  validateRegistrationInputField({ field: input.field, label: input.label, required: input.required }),
 )
 
 export const validateLoginInputField = [
@@ -55,9 +55,9 @@ export const validateLoginInputField = [
     }
     return true
   }),
-  validateEmailField('email', false),
-  validatePhoneField('phone', false),
-  validatePasswordField('password'),
+  validateEmailField({ field: 'email', label: 'E-mail', required: false }),
+  validatePhoneField({ field: 'phone', label: 'Phone', required: false }),
+  validatePasswordField({ field: 'password', label: 'Password' }),
 ]
 
 export const validateSendResetPassLinkInputField = [
@@ -67,16 +67,18 @@ export const validateSendResetPassLinkInputField = [
     }
     return true
   }),
-  validateEmailField('email', false),
-  validatePhoneField('phone', false),
+  validateEmailField({ field: 'email', label: 'E-mail', required: false }),
+  validatePhoneField({ field: 'phone', label: 'Phone', required: false }),
 ]
 
 export const validateResetPassInputField = [
-  validatePasswordField('password'),
-  validatePasswordField('confirmPassword').custom((confirmPassword, { req }) => {
-    if (confirmPassword !== req.body.password) {
-      throw new BadRequestException('Passwords do not match')
-    }
-    return true
-  }),
+  validatePasswordField({ field: 'password', label: 'Password' }),
+  validatePasswordField({ field: 'confirmPassword', label: 'Confirm Password' }).custom(
+    (confirmPassword, { req }) => {
+      if (req.body.password && confirmPassword !== req.body.password) {
+        throw new BadRequestException('Passwords do not match')
+      }
+      return true
+    },
+  ),
 ]
